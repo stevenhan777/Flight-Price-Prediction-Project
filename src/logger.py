@@ -12,8 +12,6 @@ logging.basicConfig( # basic config
     filename=LOG_FILE_PATH,
     format="[ %(asctime)s ] %(lineno)d %(name)s - %(levelname)s - %(message)s", # timestamp, linenum, name, message
     level=logging.INFO, 
-
-
 )
 
 # for testing

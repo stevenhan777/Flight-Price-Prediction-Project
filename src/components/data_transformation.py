@@ -31,7 +31,6 @@ class DataTransformation:
         '''
         try:
             # Data preprocessing
-
             df=pd.read_csv('artifacts/data.csv')
             
             # Below, converting relevant columns to timedelta to more accurately extract info
@@ -114,7 +113,7 @@ class DataTransformation:
             # replace outliers with median
             df['Price']=np.where(df['Price']>upper_bound,df['Price'].median(),df['Price'])
 
-            # Data does not seem to follow distribution so MinMaxScaler
+            # Data does not seem to follow normal distribution so MinMaxScaler
             scaler = MinMaxScaler()
             scaled_df = scaler.fit_transform(df)
             final_df = pd.DataFrame(scaled_df, columns=df.columns)
@@ -150,12 +149,10 @@ class DataTransformation:
 
             constant_columns = [column for column in input_feature_train_df.columns 
                                 if column not in input_feature_train_df.columns[var_thres.get_support()]]
-            #print(constant_columns)
+            
             input_feature_train_df.drop(constant_columns,axis=1, inplace=True)
 
             corr_features = correlation(input_feature_train_df, 0.99)
-
-            #print(corr_features)
 
             # determine the mutual information
             mutual_info = mutual_info_regression(input_feature_train_df, target_feature_train_df)

@@ -9,8 +9,6 @@ def error_message_detail(error,error_detail:sys): # error_detail present in sys
 
     return error_message
 
-    
-
 class CustomException(Exception): # inheriting from Exception
     def __init__(self,error_message,error_detail:sys):
         super().__init__(error_message) 

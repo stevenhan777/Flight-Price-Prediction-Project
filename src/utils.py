@@ -6,7 +6,7 @@ import pandas as pd
 import dill
 # import pickle
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-
+from sklearn.model_selection import RandomizedSearchCV
 # from sklearn.model_selection import GridSearchCV
 
 from src.exception import CustomException
@@ -23,7 +23,7 @@ def save_object(file_path, obj):
     except Exception as e:
         raise CustomException(e, sys)
     
-def evaluate_models(X_train, y_train,X_test,y_test,models): #,param
+def evaluate_models(X_train, y_train,X_test,y_test,models,param):
     try:
         report = {}
 
@@ -32,21 +32,20 @@ def evaluate_models(X_train, y_train,X_test,y_test,models): #,param
         
         for i in range(len(list(models))):
             model = list(models.values())[i] # get each and every model 
-           # para=param[list(models.keys())[i]]
+            para=param[list(models.keys())[i]]
 
-            # gs = GridSearchCV(model,para,cv=3)
-            # gs.fit(X_train,y_train)
+            rs = RandomizedSearchCV(model,para,cv=3)
+            rs.fit(X_train,y_train)
 
-            # model.set_params(**gs.best_params_)
-            model.fit(X_train,y_train) # train model
+            model.set_params(**rs.best_params_) # set the params of model by unpacking best_params_
 
-            #model.fit(X_train, y_train)  # Train model
+            model.fit(X_train,y_train) # train model on best params
 
             y_train_pred = model.predict(X_train)
 
             y_test_pred = model.predict(X_test)
 
-                # Evaluate Train and Test dataset
+            # Evaluate Train and Test dataset
             model_train_mae , model_train_rmse, model_train_r2 = evaluate_model(y_train, y_train_pred)
 
             model_test_mae , model_test_rmse, model_test_r2 = evaluate_model(y_test, y_test_pred)
@@ -60,6 +59,9 @@ def evaluate_models(X_train, y_train,X_test,y_test,models): #,param
             #### Also print it out
             print(list(models.keys())[i])
             model_list.append(list(models.keys())[i])
+
+            print("best params:")
+            print(rs.best_params_)
     
             print('Model performance for Training set')
             print("- Root Mean Squared Error: {:.4f}".format(model_train_rmse))
@@ -91,14 +93,6 @@ def correlation(dataset, threshold):
                 colname = corr_matrix.columns[i]  # getting the name of column
                 col_corr.add(colname)
     return col_corr
-    
-# def load_object(file_path):
-#     try:
-#         with open(file_path, "rb") as file_obj:
-#             return pickle.load(file_obj)
-
-#     except Exception as e:
-#         raise CustomException(e, sys)
 
 def evaluate_model(true, predicted):
     mae = mean_absolute_error(true, predicted)

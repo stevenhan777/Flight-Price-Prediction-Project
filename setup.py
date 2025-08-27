@@ -17,7 +17,7 @@ def get_requirements(file_path:str)->List[str]: #file_path is str, returns a Lis
     return requirements
 
 setup(
-name='2_mlproject',
+name='Flight-Price-Prediction-Project',
 version='0.0.1',
 author='Steven',
 author_email='120138752+stevenhan777@users.noreply.github.com',

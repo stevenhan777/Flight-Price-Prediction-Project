@@ -49,8 +49,6 @@ class DataIngestion:
     def save_train_test(self,train_set,test_set):
         logging.info("Entered the save_train_test")
         try:
-
-
             train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)
 
             test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
