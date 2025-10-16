@@ -33,8 +33,8 @@ class DataTransformation:
             # Data preprocessing
             df=pd.read_csv('artifacts/data.csv')
             
-            # Below, converting relevant columns to timedelta to more accurately extract info
-            df['duration_timedelta'] = pd.to_timedelta(df['Duration']) #create column of timedelta
+            # Below doing data preprocessing, please refer to EDA_FLIGHT_PRICE.ipynb for description of steps
+            df['duration_timedelta'] = pd.to_timedelta(df['Duration'])
 
             df['Dept full time'] = df['Date_of_Journey'] + ' ' + df['Dep_Time']
             df['timestamp_dept_time'] = pd.to_datetime(df['Dept full time'], format="%d/%m/%Y %H:%M")
@@ -101,17 +101,9 @@ class DataTransformation:
 
             # concat back airline, source, destination
             df=pd.concat([df,Airline,Source,Destination],axis=1)
-
-            # Calculate percentile for outliers
-            q1, q3 = np.percentile(df['Price'], [25, 75])
-            #print(q1)
-            #print(q3)
-            iqr = q3 - q1
-            lower_bound = q1 - 1.5 * iqr
-            upper_bound = q3 + 1.5 * iqr
-
-            # replace outliers with median
-            df['Price']=np.where(df['Price']>upper_bound,df['Price'].median(),df['Price'])
+            
+            # drop outliers
+            df = df[df['Price'] <= 40000]
 
             # Data does not seem to follow normal distribution so MinMaxScaler
             scaler = MinMaxScaler()
@@ -162,11 +154,18 @@ class DataTransformation:
             mutual_info.sort_values(ascending=False)
 
             # Drop the additional columns determined unnecessary
-            input_feature_train_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy', 'Route5' ],axis=1, inplace=True)
+            input_feature_train_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy'],axis=1, inplace=True)
 
             # Drop from x_test also
-            input_feature_test_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy', 'Route5', 'Jet Airways Business', 'Trujet', 'Vistara Premium economy'],axis=1, inplace=True)
-            #print(input_feature_train_df.columns.tolist())
+
+            # Get the columns present in X_test but not in X_train
+            columns_to_drop_from_X_test = input_feature_test_df.columns.difference(input_feature_train_df.columns)
+
+            # Drop these columns from X_test
+            input_feature_test_df.drop(columns=columns_to_drop_from_X_test,axis=1, inplace=True)
+
+            # input_feature_test_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy', 'Jet Airways Business', 'Trujet', 'Vistara Premium economy'],axis=1, inplace=True)
+            # #print(input_feature_train_df.columns.tolist())
 
             if input_feature_train_df.columns.tolist() == input_feature_test_df.columns.tolist():
                 pass
