@@ -1,20 +1,18 @@
 import sys
+import os
 from dataclasses import dataclass
 
 import numpy as np 
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder,MinMaxScaler, LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.feature_selection import VarianceThreshold, mutual_info_regression
+from sklearn.preprocessing import OneHotEncoder, MinMaxScaler, FunctionTransformer
+import category_encoders as ce
 
 from src.exception import CustomException
 from src.logger import logging
-import os
 
-from src.utils import save_object, correlation
+from src.utils import save_object
 
 @dataclass
 class DataTransformationConfig:
@@ -25,185 +23,115 @@ class DataTransformation:
         self.data_transformation_config=DataTransformationConfig()
 
     def get_data_transformer_object(self):
-        '''
-        This function is responsible for data transformation
-        
-        '''
         try:
-            # Data preprocessing
-            df=pd.read_csv('artifacts/data.csv')
+
+            target_encode_columns = [
+                "Route1", "Route2", "Route3", "Route4", "Route5"
+            ]
+            one_hot_encode_columns = [
+                "Airline",
+                "Source",
+                "Destination"
+            ]
+            columns_to_drop = [
+                "D_Cochin",
+                "D_Hyderabad",
+                "D_Kolkata",
+                "arrival_day",
+                "arrival_month",
+                "Route5",
+                "Jet Airways Business",
+                "Multiple carriers Premium economy",
+                "Trujet",
+                "Vistara Premium economy"
+            ]
+
+            def drop_columns(X, columns_to_drop):
+                if isinstance(X, pd.DataFrame):
+                    existing_cols = [col for col in columns_to_drop if col in X.columns]
+                    return X.drop(columns=existing_cols, errors='ignore')
+                return X
+
+            feature_transformer = ColumnTransformer(
+                transformers=[
+                    ('onehot', OneHotEncoder(drop='first', sparse_output=False, handle_unknown='ignore'), 
+                    one_hot_encode_columns),
+                    ('target_encoder', ce.TargetEncoder(), target_encode_columns)],
+                remainder='passthrough'
+            )
             
-            # Below doing data preprocessing, please refer to EDA_FLIGHT_PRICE.ipynb for description of steps
-            df['duration_timedelta'] = pd.to_timedelta(df['Duration'])
+            preprocessor = Pipeline(steps=[
+                ('feature_transformer', feature_transformer),
+                ('drop_columns', FunctionTransformer(
+                    drop_columns, 
+                    kw_args={'columns_to_drop': columns_to_drop}
+                )),
+                ('minmax_scaling', MinMaxScaler())
+            ])
 
-            df['Dept full time'] = df['Date_of_Journey'] + ' ' + df['Dep_Time']
-            df['timestamp_dept_time'] = pd.to_datetime(df['Dept full time'], format="%d/%m/%Y %H:%M")
-            
-            df['timestamp_arrival_time'] = df['timestamp_dept_time'] + df['duration_timedelta']
-            df.drop(columns=['Date_of_Journey', 'Dep_Time', 'Arrival_Time', 'Dept full time'], axis=1, inplace=True)
+            logging.info("Pipeline created to One hot encode, target encode, drop unneeded columns and MinMax scale")
 
-            df.dropna(inplace=True) # Remove NA values
-
-            df = df.drop_duplicates() # there are duplicate rows, keep the first occurance
-
-            # Below, extracting day, month, hour and minute
-            df['dept_day'] = df['timestamp_dept_time'].dt.day
-            df['dept_month'] = df['timestamp_dept_time'].dt.month
-            df['dept_hour'] = df['timestamp_dept_time'].dt.hour
-            df['dept_minute'] = df['timestamp_dept_time'].dt.minute
-
-            df['arrival_day'] = df['timestamp_arrival_time'].dt.day
-            df['arrival_month'] = df['timestamp_arrival_time'].dt.month
-            df['arrival_hour'] = df['timestamp_arrival_time'].dt.hour
-            df['arrival_minute'] = df['timestamp_arrival_time'].dt.minute
-
-            df['duration_hours'] = df['duration_timedelta'].dt.components.hours
-            df['duration_minutes'] = df['duration_timedelta'].dt.components.minutes
-
-            # Drop unneeded columns
-            df.drop(columns=['Duration', 'timestamp_dept_time', 'timestamp_arrival_time', 'duration_timedelta'], axis=1, inplace=True)
-
-            categorical_features=[column for column in df.columns if df[column].dtype=='object']
-
-            numerical_features=[column for column in df.columns if df[column].dtype!='object']
-
-            # one hot encoding Airline column
-            Airline=pd.get_dummies(df['Airline'],drop_first=True, dtype=int)
-
-            # one hot encoding source column
-            Source=pd.get_dummies(df['Source'],drop_first=True, dtype=int)
-
-            # one hot encoding destination column
-            Destination=pd.get_dummies(df['Destination'],drop_first=True, dtype=int)
-
-            # split each route into seperate column
-            df['Route1']=df['Route'].str.split('→').str[0]
-            df['Route2']=df['Route'].str.split('→').str[1]
-            df['Route3']=df['Route'].str.split('→').str[2]
-            df['Route4']=df['Route'].str.split('→').str[3]
-            df['Route5']=df['Route'].str.split('→').str[4]
-
-            # drop route column
-            df.drop(columns=['Route'], axis=1, inplace=True)
-
-            for i in ['Route3', 'Route4', 'Route5']: # fill NA with None
-                df[i].fillna('None',inplace=True)
-
-            encoder = LabelEncoder()
-            for i in ['Route1', 'Route2', 'Route3', 'Route4', 'Route5']: # encode values into numbers
-                df[i]=encoder.fit_transform(df[i])
-
-            # since ordinal data, encode as number
-            df['Total_Stops']=df['Total_Stops'].map({'non-stop':0, '2 stops':2, '1 stop':1, '3 stops':3, '4 stops':4})
-
-            # drop unneeded columns
-            df.drop(columns=['Airline', 'Source', 'Destination', 'Additional_Info'], axis=1, inplace=True)
-
-            # concat back airline, source, destination
-            df=pd.concat([df,Airline,Source,Destination],axis=1)
-            
-            # drop outliers
-            df = df[df['Price'] <= 40000]
-
-            # Data does not seem to follow normal distribution so MinMaxScaler
-            scaler = MinMaxScaler()
-            scaled_df = scaler.fit_transform(df)
-            final_df = pd.DataFrame(scaled_df, columns=df.columns)
-
-            logging.info(f"Categorical features: {categorical_features}")
-            logging.info(f"Numerical features: {numerical_features}")
-
-            return final_df
+            return preprocessor
         
         except Exception as e:
             raise CustomException(e,sys)
         
-    def initiate_data_transformation(self):
+    def initiate_data_transformation(self, train_path, test_path):
 
         try:
+            train_df = pd.read_csv(train_path)
+            test_df = pd.read_csv(test_path)
+
+            logging.info("Read train and test data completed")
+
             logging.info("Obtaining preprocessing object")
-            final_df=self.get_data_transformer_object()
+
+            preprocessing_obj = self.get_data_transformer_object()
 
             target_column_name="Price"
 
-            X=final_df.drop(target_column_name,axis=1)
-            y=final_df[target_column_name]
+            input_feature_train_df = train_df.drop(columns=[target_column_name], axis=1)
+            target_feature_train_df=train_df[target_column_name]
+            input_feature_test_df=test_df.drop(columns=[target_column_name],axis=1)
+            target_feature_test_df=test_df[target_column_name]
 
-            logging.info("Train test split initiated")
+            logging.info("Applying preprocessing object on training data only")
 
-            input_feature_train_df,input_feature_test_df,target_feature_train_df,target_feature_test_df = train_test_split(X,y,test_size=0.20,random_state=42)
+            preprocessing_obj.fit(input_feature_train_df, target_feature_train_df)
 
-            logging.info("Split train and test data completed")
+            input_feature_train_arr = preprocessing_obj.transform(input_feature_train_df)
 
-            #Feature selection process
-            var_thres = VarianceThreshold(threshold=0.001) # conservative threshold
-            var_thres.fit(input_feature_train_df)
+            #input_feature_train_arr = drop_cols_preprocessor.fit_transform(input_feature_train_arr)
+            target_feature_train_arr = np.log1p(target_feature_train_df)
+            logging.info("Transforming training features and target completed")
 
-            constant_columns = [column for column in input_feature_train_df.columns 
-                                if column not in input_feature_train_df.columns[var_thres.get_support()]]
+            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            #input_feature_test_arr = drop_cols_preprocessor.fit_transform(input_feature_test_arr)
             
-            input_feature_train_df.drop(constant_columns,axis=1, inplace=True)
+            target_feature_test_arr = np.log1p(target_feature_test_df)
+            logging.info("Transforming test features and target completed")
 
-            corr_features = correlation(input_feature_train_df, 0.99)
 
-            # determine the mutual information
-            mutual_info = mutual_info_regression(input_feature_train_df, target_feature_train_df)
-
-            mutual_info = pd.Series(mutual_info)
-            mutual_info.index = input_feature_train_df.columns
-            mutual_info.sort_values(ascending=False)
-
-            # Drop the additional columns determined unnecessary
-            input_feature_train_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy'],axis=1, inplace=True)
-
-            # Drop from x_test also
-
-            # Get the columns present in X_test but not in X_train
-            columns_to_drop_from_X_test = input_feature_test_df.columns.difference(input_feature_train_df.columns)
-
-            # Drop these columns from X_test
-            input_feature_test_df.drop(columns=columns_to_drop_from_X_test,axis=1, inplace=True)
-
-            # input_feature_test_df.drop(['Hyderabad', 'Kolkata', 'arrival_day', 'arrival_month', 'Multiple carriers Premium economy', 'Jet Airways Business', 'Trujet', 'Vistara Premium economy'],axis=1, inplace=True)
-            # #print(input_feature_train_df.columns.tolist())
-
-            if input_feature_train_df.columns.tolist() == input_feature_test_df.columns.tolist():
-                pass
-            else:
-                raise CustomException("Error: Columns not the same")
-
-            logging.info(f"Feature selection completed")
-
-            logging.info(f"Create train_df and test_df")
-
-            train_df = pd.concat([input_feature_train_df, target_feature_train_df], axis=1)
-            test_df = pd.concat([input_feature_test_df, target_feature_test_df], axis=1)
-
-            logging.info(f"Convert dataframe to array.")
 
             train_arr = np.c_[
-                np.array(input_feature_train_df), np.array(target_feature_train_df)
+                input_feature_train_arr, target_feature_train_arr
             ]
-
             test_arr = np.c_[
-                np.array(input_feature_test_df), np.array(target_feature_test_df)
+                input_feature_test_arr, target_feature_test_arr
             ]
 
             logging.info(f"Saved preprocessing object.")
 
             save_object(
-
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
-                obj=final_df
-
+                obj=preprocessing_obj
             )
 
             return (
                 train_arr,
                 test_arr,
-                train_df,
-                test_df,
                 self.data_transformation_config.preprocessor_obj_file_path,
             )
+
         except Exception as e:
             raise CustomException(e,sys)
