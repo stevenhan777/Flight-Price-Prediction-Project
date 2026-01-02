@@ -38,60 +38,64 @@ class ModelTrainer:
                 test_array[:,:-1],
                 test_array[:,-1]
             )
+
             models = {
                 "Random Forest": RandomForestRegressor(),
                 "Decision Tree": DecisionTreeRegressor(),
                 "Gradient Boosting": GradientBoostingRegressor(),
-                "Linear Regression": LinearRegression(),
-                "Lasso": Lasso(),
-                "Ridge": Ridge(),
                 "K-Neighbors Regressor": KNeighborsRegressor(),
                 "XGBRegressor": XGBRegressor(),
-                "CatBoosting Regressor": CatBoostRegressor(verbose=False),
-                "AdaBoost Regressor": AdaBoostRegressor(),
+                "CatBoosting Regressor": CatBoostRegressor(random_state = 42,verbose=False)
             }
 
             params={
                 "Random Forest":{
-                    # 'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
-                    'max_depth':[5,10,15,20],
-                    'max_features':['sqrt', 'log2', None],
-                    'n_estimators': [8,16,32,64,128,256]
+                    'n_estimators': [100, 200],
+                    'max_depth': [10, 20, None],
+                    'min_samples_split': [2, 5],
+                    'min_samples_leaf': [1, 2],
+                    'max_features': ['sqrt', 'log2']
                 },
                 "Decision Tree": {
-                    'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
-                    # 'splitter':['best','random'],
-                    # 'max_features':['sqrt','log2'],
+                    'max_depth': [5, 10, 15, 20, None],
+                    'min_samples_split': [2, 5, 10],
+                    'min_samples_leaf': [1, 2, 4],
+                    'max_features': ['sqrt', 'log2', None]
                 },
                 "Gradient Boosting":{
-                    # 'loss':['squared_error', 'huber', 'absolute_error', 'quantile'],
-                    'learning_rate':[.1,.01,.05,.001],
-                    'subsample':[0.6,0.7,0.75,0.8,0.85,0.9],
-                    # 'criterion':['squared_error', 'friedman_mse'],
-                    # 'max_features':['auto','sqrt','log2'],
-                    'n_estimators': [8,16,32,64,128,256]
+                    'n_estimators': [100, 200, 300, 500],
+                    'max_depth': [3, 5, 7, 9, 11],
+                    'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
+                    'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
+                    'min_samples_split': [2, 5, 10, 15],
+                    'min_samples_leaf': [1, 2, 4, 6],
+                    'max_features': ['sqrt', 'log2', None],
+                    'loss': ['squared_error', 'absolute_error', 'huber']
                 },
-                "Linear Regression":{},
-                "Lasso":{'alpha': np.logspace(-4, 0, 20)},
-                "Ridge":{'alpha': np.logspace(-2, 3, 20)},
                 "K-Neighbors Regressor":{
-                    'n_neighbors': range(3, 15),
+                    'n_neighbors': [3, 5, 7, 9],
                     'weights': ['uniform', 'distance'],
-                    'metric': ['euclidean', 'manhattan']
+                    'algorithm': ['auto', 'ball_tree', 'kd_tree'],
+                    'leaf_size': [20, 30, 40]
                 },
                 "XGBRegressor":{
-                    'learning_rate':[.1,.01,.05,.001],
-                    'n_estimators': [8,16,32,64,128,256]
+                    'n_estimators': [100, 200, 300, 500],
+                    'max_depth': [3, 5, 7, 9, 11],
+                    'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
+                    'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
+                    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1.0],
+                    'gamma': [0, 0.1, 0.3, 0.5, 1],
+                    'min_child_weight': [1, 3, 5, 7],
+                    'reg_alpha': [0, 0.01, 0.1, 1],
+                    'reg_lambda': [0.1, 1, 10]
                 },
                 "CatBoosting Regressor":{
-                    'depth': [6,8,10],
-                    'learning_rate': [0.01, 0.05, 0.1],
-                    'iterations': [30, 50, 100]
-                },
-                "AdaBoost Regressor":{
-                    'learning_rate':[.1,.01,0.5,.001],
-                    # 'loss':['linear','square','exponential'],
-                    'n_estimators': [8,16,32,64,128,256]
+                    'iterations': [100, 200, 300, 500],
+                    'depth': [4, 6, 8, 10],
+                    'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
+                    'l2_leaf_reg': [1, 3, 5, 7, 9],
+                    'border_count': [32, 64, 128],
+                    'subsample': [0.7, 0.8, 0.9, 1.0]
                 }
             }
 

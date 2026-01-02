@@ -8,6 +8,7 @@ if project_root not in sys.path:
 from src.exception import CustomException # import from exception.py
 from src.logger import logging 
 import pandas as pd
+import numpy as np
 
 from sklearn.model_selection import train_test_split
 from dataclasses import dataclass
@@ -15,8 +16,8 @@ from dataclasses import dataclass
 from src.components.data_transformation import DataTransformation
 from src.components.data_transformation import DataTransformationConfig
 
-# from src.components.model_trainer import ModelTrainerConfig
-# from src.components.model_trainer import ModelTrainer
+from src.components.model_trainer import ModelTrainerConfig
+from src.components.model_trainer import ModelTrainer
 
 @dataclass # decorator allow class to directly define vars
 class DataIngestionConfig:
@@ -31,8 +32,12 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or component")
         try:
-            df=pd.read_csv('notebook/data/cleaned_for_user_input.csv')
+            df=pd.read_csv('notebook/data/cleaned_for_user_input.csv') #, keep_default_na=False) # to prevent NaN in 'Route' columns
             logging.info('Read the dataset as dataframe')
+
+            df.dropna(inplace=True)
+            df = df.drop_duplicates() 
+            logging.info('Remove NA and Duplicates from the dataset')
 
             df['Source'] = "S_" + df['Source']
             df['Destination'] = "D_" + df['Destination']
@@ -47,7 +52,7 @@ class DataIngestion:
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
 
             df.to_csv(self.ingestion_config.raw_data_path,index=False,header=True)
-            
+
             logging.info('Train and test data split started')
             train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
 
@@ -71,11 +76,15 @@ if __name__=="__main__":
     data_transformation=DataTransformation()
 
     train_arr,test_arr,_= data_transformation.initiate_data_transformation(train_data,test_data)
-    print(train_arr)
-    print(test_arr)
-    # modeltrainer=ModelTrainer()
-    # best_model_name, best_roc_auc, best_params = modeltrainer.initiate_model_trainer(train_arr,test_arr)
-    # print(best_roc_auc)
+
+    #train_arr.to_csv('train_array.csv', index=False, header=True)
+    #np.savetxt('data.csv', train_arr, delimiter=',')
+    np.savetxt('data.csv', train_arr, delimiter=',')
+
+    modeltrainer=ModelTrainer()
+    best_model_name, r2_square = modeltrainer.initiate_model_trainer(train_arr,test_arr)
+    print(best_model_name)
+    print(r2_square)
 
 
 
