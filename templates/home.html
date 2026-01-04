@@ -1,0 +1,407 @@
+<html>
+<body>
+    <div class="login">
+       <form action="{{ url_for('predict_datapoint')}}" method="post">
+        <h1>
+            <legend>Flight Price Prediction</legend>
+        </h1>
+        <h4>
+            Please fill in the details below to predict the flight price (things to note):
+        </h4>        
+        <ul>
+            <li>Route1 field always specifies the source airport</li>
+            <li>Route2 through Route5 specify the layover airports and destination airport based on the number of stops</li>
+            <li>For example, if Total_Stops is 1, then Route1 will specify the Source Airport, Route3 must specify the destination airport, and Route2 will specify the layover spot. Route4 and Route5 must be 'Not Available'</li>
+            <li>If Total_Stops is 3, then Route1 will specify the Source Airport and Route5 will specify the Destination Airport. Route2,Route3, and Route4 must be populated with an airport to specify the layover spots.</li>
+        </ul>
+
+        <input type="button" class="btn btn-primary" value="Auto-populate with Random Values" onclick="autoPopulate()" />
+
+        <div class="mb-3">
+            <label class="form-label">Airline</label>
+            <select class="form-control" name="Airline" id="Airline" required>
+                <option class="placeholder" disabled value="">Select Airline</option>
+                <option value="Jet Airways Business" {% if form_values and form_values.Airline == 'Jet Airways Business' %}selected{% endif %}>Jet Airways Business</option>
+                <option value="Jet Airways" {% if form_values and form_values.Airline == 'Jet Airways' %}selected{% endif %}>Jet Airways</option>
+                <option value="Multiple carriers" {% if form_values and form_values.Airline == 'Multiple carriers' %}selected{% endif %}>Multiple carriers</option>
+                <option value="Air India" {% if form_values and form_values.Airline == 'Air India' %}selected{% endif %}>Air India</option>
+                <option value="SpiceJet" {% if form_values and form_values.Airline == 'SpiceJet' %}selected{% endif %}>SpiceJet</option>
+                <option value="GoAir" {% if form_values and form_values.Airline == 'GoAir' %}selected{% endif %}>GoAir</option>
+                <option value="IndiGo" {% if form_values and form_values.Airline == 'IndiGo' %}selected{% endif %}>IndiGo</option>
+                <option value="Vistara" {% if form_values and form_values.Airline == 'Vistara' %}selected{% endif %}>Vistara</option>
+                <option value="Multiple carriers Premium economy" {% if form_values and form_values.Airline == 'Multiple carriers Premium economy' %}selected{% endif %}>Multiple carriers Premium economy</option>
+                <option value="Air Asia" {% if form_values and form_values.Airline == 'Air Asia' %}selected{% endif %}>Air Asia</option>
+                <option value="Vistara Premium economy" {% if form_values and form_values.Airline == 'Vistara Premium economy' %}selected{% endif %}>Vistara Premium economy</option>
+                <option value="Trujet" {% if form_values and form_values.Airline == 'Trujet' %}selected{% endif %}>Trujet</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Source</label>
+            <select class="form-control" name="Source" id="Source" required>
+                <option class="placeholder" disabled value="">Select Source</option>
+                <option value="Bangalore" {% if form_values and form_values.Source == 'Bangalore' %}selected{% endif %}>Bangalore</option>
+                <option value="Delhi" {% if form_values and form_values.Source == 'Delhi' %}selected{% endif %}>Delhi</option>
+                <option value="Kolkata" {% if form_values and form_values.Source == 'Kolkata' %}selected{% endif %}>Kolkata</option>
+                <option value="Mumbai" {% if form_values and form_values.Source == 'Mumbai' %}selected{% endif %}>Mumbai</option>
+                <option value="Chennai" {% if form_values and form_values.Source == 'Chennai' %}selected{% endif %}>Chennai</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Destination</label>
+            <select class="form-control" name="Destination" id="Destination" required>
+                <option class="placeholder" disabled value="">Select Destination</option>
+                <option value="New Delhi" {% if form_values and form_values.Destination == 'New Delhi' %}selected{% endif %}>New Delhi</option>
+                <option value="Cochin" {% if form_values and form_values.Destination == 'Cochin' %}selected{% endif %}>Cochin</option>
+                <option value="Bangalore" {% if form_values and form_values.Destination == 'Bangalore' %}selected{% endif %}>Bangalore</option>
+                <option value="Hyderabad" {% if form_values and form_values.Destination == 'Hyderabad' %}selected{% endif %}>Hyderabad</option>
+                <option value="Kolkata" {% if form_values and form_values.Destination == 'Kolkata' %}selected{% endif %}>Kolkata</option>
+                <option value="Delhi" {% if form_values and form_values.Destination == 'Delhi' %}selected{% endif %}>Delhi</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Total Stops</label>
+            <select class="form-control" name="Total_Stops" id="Total_Stops" required>
+                <option class="placeholder" disabled value="">Select Number of Stops</option>
+                <option value="Non-stop" {% if form_values and form_values.Total_Stops == 'Non-stop' %}selected{% endif %}>Non-stop</option>
+                <option value="1 Stop" {% if form_values and form_values.Total_Stops == '1 Stop' %}selected{% endif %}>1 Stop</option>
+                <option value="2 Stops" {% if form_values and form_values.Total_Stops == '2 Stops' %}selected{% endif %}>2 Stops</option>
+                <option value="3 Stops" {% if form_values and form_values.Total_Stops == '3 Stops' %}selected{% endif %}>3 Stops</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departure Day</label>
+            <input class="form-control" type="number" name="dept_day" id="dept_day" placeholder="Day (1-31)" min="1" max="31" value="{% if form_values %}{{ form_values.dept_day }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departure Month</label>
+            <input class="form-control" type="number" name="dept_month" id="dept_month" placeholder="Month (1-12)" min="1" max="12" value="{% if form_values %}{{ form_values.dept_month }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departure Hour (24-hour format)</label>
+            <input class="form-control" type="number" name="dept_hour" id="dept_hour" placeholder="Hour (0-23)" min="0" max="23" value="{% if form_values %}{{ form_values.dept_hour }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Departure Minute</label>
+            <input class="form-control" type="number" name="dept_minute" id="dept_minute" placeholder="Minute (0-59)" min="0" max="59" value="{% if form_values %}{{ form_values.dept_minute }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Duration Hours</label>
+            <input class="form-control" type="number" name="duration_hours" id="duration_hours" placeholder="Hours (0-23)" min="0" max="23" value="{% if form_values %}{{ form_values.duration_hours }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Duration Minutes</label>
+            <input class="form-control" type="number" name="duration_minutes" id="duration_minutes" placeholder="Minutes (0-59)" min="0" max="59" value="{% if form_values %}{{ form_values.duration_minutes }}{% endif %}" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arrival Day (Auto-calculated)</label>
+            <input class="form-control" type="number" name="arrival_day" id="arrival_day" value="{% if form_values %}{{ form_values.arrival_day }}{% endif %}" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arrival Month (Auto-calculated)</label>
+            <input class="form-control" type="number" name="arrival_month" id="arrival_month" value="{% if form_values %}{{ form_values.arrival_month }}{% endif %}" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arrival Hour (Auto-calculated)</label>
+            <input class="form-control" type="number" name="arrival_hour" id="arrival_hour" value="{% if form_values %}{{ form_values.arrival_hour }}{% endif %}" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Arrival Minute (Auto-calculated)</label>
+            <input class="form-control" type="number" name="arrival_minute" id="arrival_minute" value="{% if form_values %}{{ form_values.arrival_minute }}{% endif %}" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Route 1 (Auto-calculated from Source)</label>
+            <input class="form-control" type="text" name="Route1" id="Route1" value="{% if form_values %}{{ form_values.Route1 }}{% endif %}" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Route 2</label>
+            <select class="form-control" name="Route2" id="Route2">
+                <option value="BOM" {% if form_values and form_values.Route2 == 'BOM' %}selected{% endif %}>BOM</option>
+                <option value="MAA" {% if form_values and form_values.Route2 == 'MAA' %}selected{% endif %}>MAA</option>
+                <option value="DEL" {% if form_values and form_values.Route2 == 'DEL' %}selected{% endif %}>DEL</option>
+                <option value="BLR" {% if form_values and form_values.Route2 == 'BLR' %}selected{% endif %}>BLR</option>
+                <option value="CCU" {% if form_values and form_values.Route2 == 'CCU' %}selected{% endif %}>CCU</option>
+                <option value="HYD" {% if form_values and form_values.Route2 == 'HYD' %}selected{% endif %}>HYD</option>
+                <option value="COK" {% if form_values and form_values.Route2 == 'COK' %}selected{% endif %}>COK</option>
+                <option value="ATQ" {% if form_values and form_values.Route2 == 'ATQ' %}selected{% endif %}>ATQ</option>
+                <option value="IDR" {% if form_values and form_values.Route2 == 'IDR' %}selected{% endif %}>IDR</option>
+                <option value="BDQ" {% if form_values and form_values.Route2 == 'BDQ' %}selected{% endif %}>BDQ</option>
+                <option value="JDH" {% if form_values and form_values.Route2 == 'JDH' %}selected{% endif %}>JDH</option>
+                <option value="IXU" {% if form_values and form_values.Route2 == 'IXU' %}selected{% endif %}>IXU</option>
+                <option value="DED" {% if form_values and form_values.Route2 == 'DED' %}selected{% endif %}>DED</option>
+                <option value="VNS" {% if form_values and form_values.Route2 == 'VNS' %}selected{% endif %}>VNS</option>
+                <option value="PNQ" {% if form_values and form_values.Route2 == 'PNQ' %}selected{% endif %}>PNQ</option>
+                <option value="UDR" {% if form_values and form_values.Route2 == 'UDR' %}selected{% endif %}>UDR</option>
+                <option value="GOI" {% if form_values and form_values.Route2 == 'GOI' %}selected{% endif %}>GOI</option>
+                <option value="AMD" {% if form_values and form_values.Route2 == 'AMD' %}selected{% endif %}>AMD</option>
+                <option value="GWL" {% if form_values and form_values.Route2 == 'GWL' %}selected{% endif %}>GWL</option>
+                <option value="BHO" {% if form_values and form_values.Route2 == 'BHO' %}selected{% endif %}>BHO</option>
+                <option value="IXC" {% if form_values and form_values.Route2 == 'IXC' %}selected{% endif %}>IXC</option>
+                <option value="LKO" {% if form_values and form_values.Route2 == 'LKO' %}selected{% endif %}>LKO</option>
+                <option value="JAI" {% if form_values and form_values.Route2 == 'JAI' %}selected{% endif %}>JAI</option>
+                <option value="VGA" {% if form_values and form_values.Route2 == 'VGA' %}selected{% endif %}>VGA</option>
+                <option value="GAU" {% if form_values and form_values.Route2 == 'GAU' %}selected{% endif %}>GAU</option>
+                <option value="RPR" {% if form_values and form_values.Route2 == 'RPR' %}selected{% endif %}>RPR</option>
+                <option value="NAG" {% if form_values and form_values.Route2 == 'NAG' %}selected{% endif %}>NAG</option>
+                <option value="IXB" {% if form_values and form_values.Route2 == 'IXB' %}selected{% endif %}>IXB</option>
+                <option value="BBI" {% if form_values and form_values.Route2 == 'BBI' %}selected{% endif %}>BBI</option>
+                <option value="HBX" {% if form_values and form_values.Route2 == 'HBX' %}selected{% endif %}>HBX</option>
+                <option value="JLR" {% if form_values and form_values.Route2 == 'JLR' %}selected{% endif %}>JLR</option>
+                <option value="IXR" {% if form_values and form_values.Route2 == 'IXR' %}selected{% endif %}>IXR</option>
+                <option value="TRV" {% if form_values and form_values.Route2 == 'TRV' %}selected{% endif %}>TRV</option>
+                <option value="PAT" {% if form_values and form_values.Route2 == 'PAT' %}selected{% endif %}>PAT</option>
+                <option value="IXZ" {% if form_values and form_values.Route2 == 'IXZ' %}selected{% endif %}>IXZ</option>
+                <option value="KNU" {% if form_values and form_values.Route2 == 'KNU' %}selected{% endif %}>KNU</option>
+                <option value="IXA" {% if form_values and form_values.Route2 == 'IXA' %}selected{% endif %}>IXA</option>
+                <option value="VTZ" {% if form_values and form_values.Route2 == 'VTZ' %}selected{% endif %}>VTZ</option>
+                <option value="STV" {% if form_values and form_values.Route2 == 'STV' %}selected{% endif %}>STV</option>
+                <option value="NDC" {% if form_values and form_values.Route2 == 'NDC' %}selected{% endif %}>NDC</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Route 3</label>
+            <select class="form-control" name="Route3" id="Route3">
+                <option value="Not Available" {% if form_values and form_values.Route3 == 'Not Available' %}selected{% endif %}>Not Available</option>
+                <option value="DEL" {% if form_values and form_values.Route3 == 'DEL' %}selected{% endif %}>DEL</option>
+                <option value="BOM" {% if form_values and form_values.Route3 == 'BOM' %}selected{% endif %}>BOM</option>
+                <option value="COK" {% if form_values and form_values.Route3 == 'COK' %}selected{% endif %}>COK</option>
+                <option value="NAG" {% if form_values and form_values.Route3 == 'NAG' %}selected{% endif %}>NAG</option>
+                <option value="BHO" {% if form_values and form_values.Route3 == 'BHO' %}selected{% endif %}>BHO</option>
+                <option value="JDH" {% if form_values and form_values.Route3 == 'JDH' %}selected{% endif %}>JDH</option>
+                <option value="HYD" {% if form_values and form_values.Route3 == 'HYD' %}selected{% endif %}>HYD</option>
+                <option value="IDR" {% if form_values and form_values.Route3 == 'IDR' %}selected{% endif %}>IDR</option>
+                <option value="PNQ" {% if form_values and form_values.Route3 == 'PNQ' %}selected{% endif %}>PNQ</option>
+                <option value="JAI" {% if form_values and form_values.Route3 == 'JAI' %}selected{% endif %}>JAI</option>
+                <option value="AMD" {% if form_values and form_values.Route3 == 'AMD' %}selected{% endif %}>AMD</option>
+                <option value="VTZ" {% if form_values and form_values.Route3 == 'VTZ' %}selected{% endif %}>VTZ</option>
+                <option value="BLR" {% if form_values and form_values.Route3 == 'BLR' %}selected{% endif %}>BLR</option>
+                <option value="IMF" {% if form_values and form_values.Route3 == 'IMF' %}selected{% endif %}>IMF</option>
+                <option value="BBI" {% if form_values and form_values.Route3 == 'BBI' %}selected{% endif %}>BBI</option>
+                <option value="VGA" {% if form_values and form_values.Route3 == 'VGA' %}selected{% endif %}>VGA</option>
+                <option value="CCU" {% if form_values and form_values.Route3 == 'CCU' %}selected{% endif %}>CCU</option>
+                <option value="IXR" {% if form_values and form_values.Route3 == 'IXR' %}selected{% endif %}>IXR</option>
+                <option value="UDR" {% if form_values and form_values.Route3 == 'UDR' %}selected{% endif %}>UDR</option>
+                <option value="ISK" {% if form_values and form_values.Route3 == 'ISK' %}selected{% endif %}>ISK</option>
+                <option value="HBX" {% if form_values and form_values.Route3 == 'HBX' %}selected{% endif %}>HBX</option>
+                <option value="GAU" {% if form_values and form_values.Route3 == 'GAU' %}selected{% endif %}>GAU</option>
+                <option value="GOI" {% if form_values and form_values.Route3 == 'GOI' %}selected{% endif %}>GOI</option>
+                <option value="IXC" {% if form_values and form_values.Route3 == 'IXC' %}selected{% endif %}>IXC</option>
+                <option value="MAA" {% if form_values and form_values.Route3 == 'MAA' %}selected{% endif %}>MAA</option>
+                <option value="TRV" {% if form_values and form_values.Route3 == 'TRV' %}selected{% endif %}>TRV</option>
+                <option value="HYD" {% if form_values and form_values.Route3 == 'HYD' %}selected{% endif %}>HYD</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Route 4</label>
+            <select class="form-control" name="Route4" id="Route4">
+                <option value="Not Available" {% if form_values and form_values.Route4 == 'Not Available' %}selected{% endif %}>Not Available</option>
+                <option value="COK" {% if form_values and form_values.Route4 == 'COK' %}selected{% endif %}>COK</option>
+                <option value="DEL" {% if form_values and form_values.Route4 == 'DEL' %}selected{% endif %}>DEL</option>
+                <option value="HYD" {% if form_values and form_values.Route4 == 'HYD' %}selected{% endif %}>HYD</option>
+                <option value="BOM" {% if form_values and form_values.Route4 == 'BOM' %}selected{% endif %}>BOM</option>
+                <option value="BLR" {% if form_values and form_values.Route4 == 'BLR' %}selected{% endif %}>BLR</option>
+                <option value="BBI" {% if form_values and form_values.Route4 == 'BBI' %}selected{% endif %}>BBI</option>
+                <option value="BHO" {% if form_values and form_values.Route4 == 'BHO' %}selected{% endif %}>BHO</option>
+                <option value="GWL" {% if form_values and form_values.Route4 == 'GWL' %}selected{% endif %}>GWL</option>
+                <option value="TRV" {% if form_values and form_values.Route4 == 'TRV' %}selected{% endif %}>TRV</option>
+                <option value="NAG" {% if form_values and form_values.Route4 == 'NAG' %}selected{% endif %}>NAG</option>
+                <option value="AMD" {% if form_values and form_values.Route4 == 'AMD' %}selected{% endif %}>AMD</option>
+                <option value="CCU" {% if form_values and form_values.Route4 == 'CCU' %}selected{% endif %}>CCU</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Route 5</label>
+            <select class="form-control" name="Route5" id="Route5">
+                <option value="Not Available" {% if form_values and form_values.Route5 == 'Not Available' %}selected{% endif %}>Not Available</option>
+                <option value="COK" {% if form_values and form_values.Route5 == 'COK' %}selected{% endif %}>COK</option>
+                <option value="HYD" {% if form_values and form_values.Route5 == 'HYD' %}selected{% endif %}>HYD</option>
+                <option value="BLR" {% if form_values and form_values.Route5 == 'BLR' %}selected{% endif %}>BLR</option>
+                <option value="DEL" {% if form_values and form_values.Route5 == 'DEL' %}selected{% endif %}>DEL</option>
+                <option value="CCU" {% if form_values and form_values.Route5 == 'CCU' %}selected{% endif %}>CCU</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input class="btn btn-primary" type="submit" value="Predict Flight Price" required />
+        </div>
+    </form>
+    <h2>
+       The prediction is (In Indian Rupee): {{results_indian}}
+    </h2>
+    <h2>
+       Converted to US Dollar: {{results_us}}
+    </h2>
+   </div>
+
+   <script>
+   var sourceToCode = {
+       'Bangalore': 'BLR',
+       'Delhi': 'DEL',
+       'Kolkata': 'CCU',
+       'Mumbai': 'BOM',
+       'Chennai': 'MAA'
+   };
+
+   var destToCode = {
+       'New Delhi': 'DEL',
+       'Cochin': 'COK',
+       'Bangalore': 'BLR',
+       'Hyderabad': 'HYD',
+       'Kolkata': 'CCU',
+       'Delhi': 'DEL'
+   };
+
+   function updateRoutes() {
+       var source = document.getElementById('Source').value;
+       var destination = document.getElementById('Destination').value;
+       var totalStops = document.getElementById('Total_Stops').value;
+
+       if (!source || !destination || !totalStops) return;
+
+       var sourceCode = sourceToCode[source];
+       var destCode = destToCode[destination];
+
+       var route2Select = document.getElementById('Route2');
+       var route3Select = document.getElementById('Route3');
+       var route4Select = document.getElementById('Route4');
+       var route5Select = document.getElementById('Route5');
+
+       document.getElementById('Route1').value = sourceCode;
+
+       if (totalStops === 'Non-stop') {
+           route2Select.value = destCode;
+           route2Select.disabled = false;
+           route3Select.value = 'Not Available';
+           route3Select.disabled = false;
+           route4Select.value = 'Not Available';
+           route4Select.disabled = false;
+           route5Select.value = 'Not Available';
+           route5Select.disabled = false;
+       } else if (totalStops === '1 Stop') {
+           route2Select.disabled = false;
+           route3Select.value = destCode;
+           route3Select.disabled = false;
+           route4Select.value = 'Not Available';
+           route4Select.disabled = false;
+           route5Select.value = 'Not Available';
+           route5Select.disabled = false;
+       } else if (totalStops === '2 Stops') {
+           route2Select.disabled = false;
+           route3Select.disabled = false;
+           route4Select.value = destCode;
+           route4Select.disabled = false;
+           route5Select.value = 'Not Available';
+           route5Select.disabled = false;
+       } else if (totalStops === '3 Stops') {
+           route2Select.disabled = false;
+           route3Select.disabled = false;
+           route4Select.disabled = false;
+           route5Select.value = destCode;
+           route5Select.disabled = false;
+       }
+   }
+
+   function calculateArrival() {
+       var deptDay = parseInt(document.getElementById('dept_day').value);
+       var deptMonth = parseInt(document.getElementById('dept_month').value);
+       var deptHour = parseInt(document.getElementById('dept_hour').value);
+       var deptMinute = parseInt(document.getElementById('dept_minute').value);
+       var durationHours = parseInt(document.getElementById('duration_hours').value) || 0;
+       var durationMinutes = parseInt(document.getElementById('duration_minutes').value) || 0;
+
+       if (!deptDay || !deptMonth || deptHour === '' || deptMinute === '') return;
+
+       var arrivalMinute = deptMinute + durationMinutes;
+       var arrivalHour = deptHour + durationHours;
+       var arrivalDay = deptDay;
+       var arrivalMonth = deptMonth;
+
+       if (arrivalMinute >= 60) {
+           arrivalHour += Math.floor(arrivalMinute / 60);
+           arrivalMinute = arrivalMinute % 60;
+       }
+
+       if (arrivalHour >= 24) {
+           arrivalDay += Math.floor(arrivalHour / 24);
+           arrivalHour = arrivalHour % 24;
+       }
+
+       var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+       while (arrivalDay > daysInMonth[arrivalMonth - 1]) {
+           arrivalDay -= daysInMonth[arrivalMonth - 1];
+           arrivalMonth++;
+           if (arrivalMonth > 12) {
+               arrivalMonth = 1;
+           }
+       }
+
+       document.getElementById('arrival_day').value = arrivalDay;
+       document.getElementById('arrival_month').value = arrivalMonth;
+       document.getElementById('arrival_hour').value = arrivalHour;
+       document.getElementById('arrival_minute').value = arrivalMinute;
+   }
+
+   function autoPopulate() {
+       console.log('Auto-populate function called');
+       
+       try {
+           var airlines = ['Jet Airways Business', 'Jet Airways', 'Multiple carriers', 'Air India', 
+                           'SpiceJet', 'GoAir', 'IndiGo', 'Vistara', 'Multiple carriers Premium economy', 
+                           'Air Asia', 'Vistara Premium economy', 'Trujet'];
+           var sources = ['Bangalore', 'Delhi', 'Kolkata', 'Mumbai', 'Chennai'];
+           var destinations = ['New Delhi', 'Cochin', 'Bangalore', 'Hyderabad', 'Kolkata', 'Delhi'];
+           var stops = ['Non-stop', '1 Stop', '2 Stops', '3 Stops'];
+
+           document.getElementById('Airline').value = airlines[Math.floor(Math.random() * airlines.length)];
+           document.getElementById('Source').value = sources[Math.floor(Math.random() * sources.length)];
+           document.getElementById('Destination').value = destinations[Math.floor(Math.random() * destinations.length)];
+           document.getElementById('Total_Stops').value = stops[Math.floor(Math.random() * stops.length)];
+           
+           document.getElementById('dept_day').value = Math.floor(Math.random() * 28) + 1;
+           document.getElementById('dept_month').value = Math.floor(Math.random() * 12) + 1;
+           document.getElementById('dept_hour').value = Math.floor(Math.random() * 24);
+           document.getElementById('dept_minute').value = Math.floor(Math.random() * 60);
+           document.getElementById('duration_hours').value = Math.floor(Math.random() * 24);
+           document.getElementById('duration_minutes').value = Math.floor(Math.random() * 60);
+
+           updateRoutes();
+           calculateArrival();
+           
+           console.log('Auto-populate completed successfully');
+       } catch (error) {
+           console.error('Error in autoPopulate:', error);
+       }
+   }
+
+   document.getElementById('Source').addEventListener('change', updateRoutes);
+   document.getElementById('Destination').addEventListener('change', updateRoutes);
+   document.getElementById('Total_Stops').addEventListener('change', updateRoutes);
+   
+   document.getElementById('dept_day').addEventListener('change', calculateArrival);
+   document.getElementById('dept_month').addEventListener('change', calculateArrival);
+   document.getElementById('dept_hour').addEventListener('change', calculateArrival);
+   document.getElementById('dept_minute').addEventListener('change', calculateArrival);
+   document.getElementById('duration_hours').addEventListener('change', calculateArrival);
+   document.getElementById('duration_minutes').addEventListener('change', calculateArrival);
+   </script>
+
+ </body>
+</html>

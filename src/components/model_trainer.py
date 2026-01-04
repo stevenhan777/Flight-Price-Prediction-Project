@@ -40,55 +40,55 @@ class ModelTrainer:
             )
 
             models = {
-                "Random Forest": RandomForestRegressor(),
-                "Decision Tree": DecisionTreeRegressor(),
-                "Gradient Boosting": GradientBoostingRegressor(),
-                "K-Neighbors Regressor": KNeighborsRegressor(),
-                "XGBRegressor": XGBRegressor(),
+                # "Random Forest": RandomForestRegressor(),
+                # "Decision Tree": DecisionTreeRegressor(),
+                # "Gradient Boosting": GradientBoostingRegressor(),
+                # "K-Neighbors Regressor": KNeighborsRegressor(),
+                # "XGBRegressor": XGBRegressor(),
                 "CatBoosting Regressor": CatBoostRegressor(random_state = 42,verbose=False)
             }
 
             params={
-                "Random Forest":{
-                    'n_estimators': [100, 200],
-                    'max_depth': [10, 20, None],
-                    'min_samples_split': [2, 5],
-                    'min_samples_leaf': [1, 2],
-                    'max_features': ['sqrt', 'log2']
-                },
-                "Decision Tree": {
-                    'max_depth': [5, 10, 15, 20, None],
-                    'min_samples_split': [2, 5, 10],
-                    'min_samples_leaf': [1, 2, 4],
-                    'max_features': ['sqrt', 'log2', None]
-                },
-                "Gradient Boosting":{
-                    'n_estimators': [100, 200, 300, 500],
-                    'max_depth': [3, 5, 7, 9, 11],
-                    'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
-                    'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
-                    'min_samples_split': [2, 5, 10, 15],
-                    'min_samples_leaf': [1, 2, 4, 6],
-                    'max_features': ['sqrt', 'log2', None],
-                    'loss': ['squared_error', 'absolute_error', 'huber']
-                },
-                "K-Neighbors Regressor":{
-                    'n_neighbors': [3, 5, 7, 9],
-                    'weights': ['uniform', 'distance'],
-                    'algorithm': ['auto', 'ball_tree', 'kd_tree'],
-                    'leaf_size': [20, 30, 40]
-                },
-                "XGBRegressor":{
-                    'n_estimators': [100, 200, 300, 500],
-                    'max_depth': [3, 5, 7, 9, 11],
-                    'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
-                    'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
-                    'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1.0],
-                    'gamma': [0, 0.1, 0.3, 0.5, 1],
-                    'min_child_weight': [1, 3, 5, 7],
-                    'reg_alpha': [0, 0.01, 0.1, 1],
-                    'reg_lambda': [0.1, 1, 10]
-                },
+                # "Random Forest":{
+                #     'n_estimators': [100, 200],
+                #     'max_depth': [10, 20, None],
+                #     'min_samples_split': [2, 5],
+                #     'min_samples_leaf': [1, 2],
+                #     'max_features': ['sqrt', 'log2']
+                # },
+                # "Decision Tree": {
+                #     'max_depth': [5, 10, 15, 20, None],
+                #     'min_samples_split': [2, 5, 10],
+                #     'min_samples_leaf': [1, 2, 4],
+                #     'max_features': ['sqrt', 'log2', None]
+                # },
+                # "Gradient Boosting":{
+                #     'n_estimators': [100, 200, 300, 500],
+                #     'max_depth': [3, 5, 7, 9, 11],
+                #     'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
+                #     'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
+                #     'min_samples_split': [2, 5, 10, 15],
+                #     'min_samples_leaf': [1, 2, 4, 6],
+                #     'max_features': ['sqrt', 'log2', None],
+                #     'loss': ['squared_error', 'absolute_error', 'huber']
+                # },
+                # "K-Neighbors Regressor":{
+                #     'n_neighbors': [3, 5, 7, 9],
+                #     'weights': ['uniform', 'distance'],
+                #     'algorithm': ['auto', 'ball_tree', 'kd_tree'],
+                #     'leaf_size': [20, 30, 40]
+                # },
+                # "XGBRegressor":{
+                #     'n_estimators': [100, 200, 300, 500],
+                #     'max_depth': [3, 5, 7, 9, 11],
+                #     'learning_rate': [0.01, 0.03, 0.05, 0.1, 0.15],
+                #     'subsample': [0.6, 0.7, 0.8, 0.9, 1.0],
+                #     'colsample_bytree': [0.6, 0.7, 0.8, 0.9, 1.0],
+                #     'gamma': [0, 0.1, 0.3, 0.5, 1],
+                #     'min_child_weight': [1, 3, 5, 7],
+                #     'reg_alpha': [0, 0.01, 0.1, 1],
+                #     'reg_lambda': [0.1, 1, 10]
+                # },
                 "CatBoosting Regressor":{
                     'iterations': [100, 200, 300, 500],
                     'depth': [4, 6, 8, 10],

@@ -46,7 +46,7 @@ class DataIngestion:
             df = df[df['Price'] <= 40000]
             logging.info('Removed prices greater than 40000 as outliers')
 
-            df['Total_Stops']=df['Total_Stops'].map({'non-stop':0, '2 stops':2, '1 stop':1, '3 stops':3})
+            df['Total_Stops']=df['Total_Stops'].map({'Non-stop':0, '2 Stops':2, '1 Stop':1, '3 Stops':3})
             logging.info('Mapped Total_Stops column to numerical values')
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
