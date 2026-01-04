@@ -1,11 +1,7 @@
-pandas
-numpy
-seaborn
-matplotlib
-scikit-learn==1.5.2
-catboost
-xgboost
-dill
-category_encoders
+catboost==1.2.8
+category_encoders==2.7.0
+dill==0.4.0
 Flask==3.1.2
--e .
+numpy==1.26.4
+pandas==2.3.3
+scikit-learn==1.5.2
