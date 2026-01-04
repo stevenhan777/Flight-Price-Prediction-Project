@@ -5,7 +5,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from src.exception import CustomException # import from exception.py
+from src.exception import CustomException
 from src.logger import logging 
 import pandas as pd
 import numpy as np
@@ -76,10 +76,6 @@ if __name__=="__main__":
     data_transformation=DataTransformation()
 
     train_arr,test_arr,_= data_transformation.initiate_data_transformation(train_data,test_data)
-
-    #train_arr.to_csv('train_array.csv', index=False, header=True)
-    #np.savetxt('data.csv', train_arr, delimiter=',')
-    np.savetxt('data.csv', train_arr, delimiter=',')
 
     modeltrainer=ModelTrainer()
     best_model_name, r2_square = modeltrainer.initiate_model_trainer(train_arr,test_arr)

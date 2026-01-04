@@ -1,2 +1,2 @@
-## Flight Price Prediction Project
-# EDA on Flight Price dataset, feature engineering, feature selection, model train and best model with hyperparameter tuning
+# Flight Price Prediction Project
+### Perform Exploratory Data Analysis on the Flight Price dataset, perform data cleaning, feature engineering, feature selection, and model training. Find the best model with hyperparameter tuning, build in Flask webapp and deploy on AWS. Please see notebooks for details and modular implementation in components and pipeline.

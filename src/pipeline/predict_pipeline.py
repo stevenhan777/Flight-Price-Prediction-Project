@@ -13,65 +13,36 @@ class PredictPipeline:
 
     def predict(self, features):
         try:
-            # Get the absolute path to the project root directory
-            # Go up from src/pipeline/ to the project root
             current_dir = os.path.dirname(os.path.abspath(__file__))
             project_root = os.path.dirname(os.path.dirname(current_dir))
 
             model_path = os.path.join(project_root, "artifacts", "model.pkl")
             preprocessor_path = os.path.join(project_root, 'artifacts', 'preprocessor.pkl')
             
-            print(f"Current directory: {current_dir}")
-            print(f"Project root: {project_root}")
-            print(f"Loading model from: {model_path}")
-            print(f"Model file exists: {os.path.exists(model_path)}")
-            print(f"Loading preprocessor from: {preprocessor_path}")
-            print(f"Preprocessor file exists: {os.path.exists(preprocessor_path)}")
-            
-            # List contents of artifacts directory
-            artifacts_dir = os.path.join(project_root, "artifacts")
-            if os.path.exists(artifacts_dir):
-                print(f"Contents of artifacts directory: {os.listdir(artifacts_dir)}")
-            else:
-                print(f"Artifacts directory does not exist at: {artifacts_dir}")
-
             print("Before Loading")
 
             model = load_object(file_path=model_path)
             preprocessor = load_object(file_path=preprocessor_path)
             print("Preprocessor loaded successfully")
-            
-            # print("After Loading")
-            # data_scaled = preprocessor.transform(features)
-            # #data_scaled = features
-            # preds = model.predict(data_scaled)
-
-
-
-             
+                         
             print("After Loading")
-            print(f"Input features shape before preprocessing: {features.shape}")
-            print(f"Input features:\n{features}")
-            
+
             # Apply the same preprocessing transformation used during training
             data_scaled = preprocessor.transform(features)
-            print(f"Data shape after preprocessing: {data_scaled.shape}")
             
-            # Get predictions (these will be in log scale since target was log-transformed)
+            # Get predictions
             preds_log = model.predict(data_scaled)
             print(f"Log-transformed predictions: {preds_log}")
             
             # Inverse transform from log scale back to actual price
-            # Since we used np.log1p() during training, we use np.expm1() to reverse it
+            # Since used np.log1p() during training, use np.expm1() to reverse it
             preds = np.expm1(preds_log)
             print(f"Final predictions (actual price): {preds}")
-
 
             return preds
         
         except Exception as e:
             raise CustomException(e, sys)
-
 
 class CustomData:
     def __init__(self,

@@ -19,24 +19,6 @@ def predict_datapoint():
         return render_template('home.html')
     else:
         
-        # Mapping dictionaries for Source and Destination
-        # source_to_code = {
-        #     'Bangalore': 'BLR',
-        #     'Delhi': 'DEL',
-        #     'Kolkata': 'CCU',
-        #     'Mumbai': 'BOM',
-        #     'Chennai': 'MAA'
-        # }
-        
-        # dest_to_code = {
-        #     'New Delhi': 'DEL',
-        #     'Cochin': 'COK',
-        #     'Bangalore': 'BLR',
-        #     'Hyderabad': 'HYD',
-        #     'Kolkata': 'CCU',
-        #     'Delhi': 'DEL'
-        # }
-        
         # Total_Stops mapping
         stops_mapping = {
             'Non-stop': 0,
@@ -45,13 +27,9 @@ def predict_datapoint():
             '3 Stops': 3
         }
         
-        # Get city names from form and convert to airport codes
         source_city = request.form.get('Source')
         dest_city = request.form.get('Destination')
         total_stops_str = request.form.get('Total_Stops')
-        
-        # source_code = source_to_code.get(source_city, source_city)
-        # dest_code = dest_to_code.get(dest_city, dest_city)
         
         # Add prefixes like in training
         source_with_prefix = "S_" + source_city
@@ -59,8 +37,6 @@ def predict_datapoint():
         
         # Map Total_Stops to numerical value
         total_stops_numeric = stops_mapping.get(total_stops_str, 0)
-
-
 
         data = CustomData(
             Airline=request.form.get('Airline'),
@@ -94,7 +70,9 @@ def predict_datapoint():
         print("after Prediction")
         
         predicted_price = results[0]
+        # Original price is in Indian Rupees
         result_text = f"₹{predicted_price:,.2f}"
+        # Convert to US Dollars (assuming 1 Rupee = 0.011 USD)
         us_dollar = f"${predicted_price*0.011:,.2f}"
 
         # Pass form values back to template to preserve them

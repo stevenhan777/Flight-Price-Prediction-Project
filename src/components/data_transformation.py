@@ -101,17 +101,13 @@ class DataTransformation:
 
             input_feature_train_arr = preprocessing_obj.transform(input_feature_train_df)
 
-            #input_feature_train_arr = drop_cols_preprocessor.fit_transform(input_feature_train_arr)
             target_feature_train_arr = np.log1p(target_feature_train_df)
             logging.info("Transforming training features and target completed")
 
             input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
-            #input_feature_test_arr = drop_cols_preprocessor.fit_transform(input_feature_test_arr)
             
             target_feature_test_arr = np.log1p(target_feature_test_df)
             logging.info("Transforming test features and target completed")
-
-
 
             train_arr = np.c_[
                 input_feature_train_arr, target_feature_train_arr
