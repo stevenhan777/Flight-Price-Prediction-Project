@@ -10,8 +10,8 @@
 * Model Training
 * Feature selection
 * Hyperparameter Tuning
-* Best model
-* Flask web app
+* Best model selection
+* Create Flask web application
 * AWS Deployment
 
 #### 1) Problem Statement
@@ -24,7 +24,7 @@ The data is obtained from Kaggle: https://www.kaggle.com/datasets/nikhilmittal/f
 
 #### 3) EDA Notebook
 
-Data cleaning, exploratory data analysis and feature engineering is performed. Many of the columns were in inconsistent format and required extensive feature engineering. Highly correlated features and features with low mutual information gain are removed. The dataset is split into train and test split. The dataset is scaled with MinMax on the features and with log scale on the dependent variable. The dataset is also left unscaled for testing. 
+Data cleaning, exploratory data analysis and feature engineering is performed. Many of the columns were in inconsistent format and required extensive feature engineering. Highly correlated features and features with low mutual information gain are removed. The dataset is split into train and test split. The dataset is scaled with MinMax on the features and with log scale on the dependent variable. The dataset is also left unscaled for comparing model performance.
 
 #### 4) Model Training Notebook
 
@@ -36,15 +36,15 @@ Perform feature selection using the CatBoost model on the scaled dataset. Try it
 
 #### 6) Hyperparameter Tuning Notebook
 
-Here, I perform quick hyperparameter tuning on the most promising models: Decision Tree, Random Forest, K-Neighbors, XGBoost, CatBoost, and GradientBoost. Then I perform more comprehensive hyperparamter tuning on the most promising models: XGBoost, CatBoost, and GradientBoost. Final result is the CatBoost model after hyperparameter tuning has the best R2 score.  
+Here, I perform quick hyperparameter tuning on the most promising models: Decision Tree, Random Forest, K-Neighbors, XGBoost, CatBoost, and GradientBoost. I determine the top 3 models, and then I perform more comprehensive hyperparamter tuning on these models: XGBoost, CatBoost, and GradientBoost. Final result is the CatBoost model after hyperparameter tuning has the best R2 score.
 
 #### 7) Modular implementation
 
-I then implemented my process in a modular way within the components folder with a data_ingestion, data_transformation and model_trainer steps. In the Notebook 0: Input Dataset I perform preliminary data cleaning and feature engineering to transform dataset into a user friendly input. Then I further transform the input data with Column Transformer and a pipeline and perform hyperparameter tuning to determine the best model. 
+I then implemented my process in a modular way within the components folder with a data_ingestion, data_transformation and model_trainer steps. In the Notebook 0: Input Dataset I perform preliminary data cleaning and feature engineering to transform dataset into a format for user input. Then I further transform the input data with Column Transformer and a pipeline and perform hyperparameter tuning to determine the best model. 
 
 #### 8) Flask web app implementation
 
-I then create a predict_pipeline, application and home.html file to create a simple web application for the user to input the fields and get a prediction of the flight price using the best model pickle file. I added user input constraints to make sure the user entered fields are accurate. 
+I then create a predict_pipeline, application and home.html file to create a simple web application for the user to input the fields and get a prediction of the flight price using the best model pickle file. I added random input of fields for ease of use, and user input constraints to make sure the user entered fields are accurate. 
 
 #### 9) Deployment on AWS
 
