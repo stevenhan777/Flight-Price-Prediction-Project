@@ -6,14 +6,8 @@
             <legend>Flight Price Prediction</legend>
         </h1>
         <h4>
-            Please fill in the details below to predict the flight price (things to note):
+            Fill in the details below to predict the flight price:
         </h4>        
-        <ul>
-            <li>Route1 field always specifies the source airport</li>
-            <li>Route2 through Route5 specify the layover airports and destination airport based on the number of stops</li>
-            <li>For example, if Total_Stops is 1, then Route1 will specify the Source Airport, Route3 must specify the destination airport, and Route2 will specify the layover spot. Route4 and Route5 must be 'Not Available'</li>
-            <li>If Total_Stops is 3, then Route1 will specify the Source Airport and Route5 will specify the Destination Airport. Route2,Route3, and Route4 must be populated with an airport to specify the layover spots.</li>
-        </ul>
 
         <input type="button" class="btn btn-primary" value="Auto-populate with Random Values" onclick="autoPopulate()" />
 
